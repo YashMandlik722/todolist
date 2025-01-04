@@ -11,11 +11,10 @@ class App extends Component{
       priorityList : [{priorityNo : 1,priorityName : "High"},{priorityNo : 2,priorityName : "Medium"},{priorityNo : 3 ,priorityName : "Low"}]
     }
     this.isTotal = true;
-    this.totalTask = data;
-    this.highTask = this.totalTask.filter((data)=>{return data.priority.priorityNo == 1});
-    this.mediumTask = this.totalTask.filter((data)=>{return data.priority.priorityNo == 1});
-    this.lowTask = this.totalTask.filter((data)=>{return data.priority.priorityNo == 1});
+    this.isDeactive = false;
+    this.isPriority = "";
 
+    this.totalTask = data;
     this.activeTask = this.totalTask.filter((data)=>{return data.isActive == "Active"});
     this.deactiveTask = this.totalTask.filter((data)=>{return data.isActive == "Deactive"});
 
@@ -50,14 +49,18 @@ class App extends Component{
 
   //Filtering on priority
   filterTask = (status)=>{
+    this.isPriority = "";
     if(status == "Total"){
       this.isTotal = true;
+      this.isDeactive = false;
       this.setState({tasklist : [...this.totalTask].sort((a, b) => a.priority.priorityNo - b.priority.priorityNo)});
     }else{
       this.isTotal = false;
       if(status == "Active"){
+        this.isDeactive = false;
         this.setState({tasklist : [...this.activeTask].sort((a, b) => a.priority.priorityNo - b.priority.priorityNo)});
       }else{
+        this.isDeactive = true;
         this.setState({tasklist : [...this.deactiveTask].sort((a, b) => a.priority.priorityNo - b.priority.priorityNo)});
       }
       // let filteredTask = this.totalTask.filter((task)=>{return task.isActive==status})
@@ -104,6 +107,46 @@ class App extends Component{
     
   }
 
+  filterTaskOnPriority = (priority)=>{
+    if(this.isTotal){
+      if(priority == "High"){
+        this.isPriority = "High";
+        this.setState({tasklist : this.totalTask.filter((data)=>{return data.priority.priorityNo == 1})});
+      }else if(priority == "Medium"){
+        this.isPriority = "Medium";
+        this.setState({tasklist : this.totalTask.filter((data)=>{return data.priority.priorityNo == 2})});
+      }else{
+        this.isPriority = "Low";
+        this.setState({tasklist : this.totalTask.filter((data)=>{return data.priority.priorityNo == 3})});
+      }
+    }else{
+        if(this.isDeactive){
+          if(priority == "High"){
+            this.isPriority = "High";
+            this.setState({tasklist : this.deactiveTask.filter((data)=>{return data.priority.priorityNo == 1})});
+          }else if(priority == "Medium"){
+            this.isPriority = "Medium";
+            this.setState({tasklist : this.deactiveTask.filter((data)=>{return data.priority.priorityNo == 2})});
+          }else{
+            this.isPriority = "Low";
+            this.setState({tasklist : this.deactiveTask.filter((data)=>{return data.priority.priorityNo == 3})});
+          }
+        }else{
+          if(priority == "High"){
+            this.isPriority = "High";
+            this.setState({tasklist : this.activeTask.filter((data)=>{return data.priority.priorityNo == 1})});
+          }else if(priority == "Medium"){
+            this.isPriority = "Medium";
+            this.setState({tasklist : this.activeTask.filter((data)=>{return data.priority.priorityNo == 2})});
+          }else{
+            this.isPriority = "Low";
+            this.setState({tasklist : this.activeTask.filter((data)=>{return data.priority.priorityNo == 3})});
+          }
+        }
+      
+    }
+  }
+
   render(){
     return <>
       <Header/>
@@ -124,19 +167,19 @@ class App extends Component{
 
       <div className="container row mt-3">
       <div className="col-md-4">
-      <button className="btn btn-outline-danger m-2" >High({this.totalTask.filter((task)=>{return task.priority.priorityName=="High"}).length})</button>
-      <button className="btn btn-outline-warning m-2" >Medium({this.totalTask.filter((task)=>{return task.priority.priorityName=="Medium"}).length})</button>
-      <button className="btn btn-outline-success m-2" >Low({this.totalTask.filter((task)=>{return task.priority.priorityName=="Low"}).length})</button>
+      <button className={this.isPriority == "High"?"btn btn-danger m-2":"btn btn-outline-danger m-2"} onClick={()=>{this.filterTaskOnPriority("High")}}>High({this.totalTask.filter((task)=>{return task.priority.priorityName=="High"}).length})</button>
+      <button className={this.isPriority == "Medium"?"btn btn-warning m-2":"btn btn-outline-warning m-2"} onClick={()=>{this.filterTaskOnPriority("Medium")}}>Medium({this.totalTask.filter((task)=>{return task.priority.priorityName=="Medium"}).length})</button>
+      <button className={this.isPriority == "Low"?"btn btn-success m-2":"btn btn-outline-success m-2"} onClick={()=>{this.filterTaskOnPriority("Low")}}>Low({this.totalTask.filter((task)=>{return task.priority.priorityName=="Low"}).length})</button>
       </div>
 
       <div className="col-md-4">
-      <button className="btn btn-info m-2" onClick={()=>{this.filterTask("Active")}}>Active({this.totalTask.filter((task)=>{return task.isActive=="Active"}).length})</button>
-      <button className="btn btn-dark m-2" onClick={()=>{this.filterTask("Deactive")}}>Deactive({this.totalTask.filter((task)=>{return task.isActive=="Deactive"}).length})</button>
+      <button className={!this.isDeactive && !this.isTotal?"btn btn-dark m-2":"btn btn-outline-dark m-2"} onClick={()=>{this.filterTask("Active")}}>Active({this.totalTask.filter((task)=>{return task.isActive=="Active"}).length})</button>
+      <button className={this.isDeactive?"btn btn-dark m-2":"btn btn-outline-dark m-2"} onClick={()=>{this.filterTask("Deactive")}}>Deactive({this.totalTask.filter((task)=>{return task.isActive=="Deactive"}).length})</button>
       
       </div>
 
       <div className="col-md-4">
-      <button className="btn btn-secondary m-2" onClick={()=>{this.filterTask("Total")}}>Total({this.totalTask.length})</button>
+      <button className={this.isTotal?"btn btn-secondary m-2":"btn btn-outline-secondary m-2"} onClick={()=>{this.filterTask("Total")}}>Total({this.totalTask.length})</button>
       </div>
 
       </div>
